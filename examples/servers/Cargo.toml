@@ -12,6 +12,7 @@ rmcp = { workspace = true, features = [
     "transport-io",
     "transport-streamable-http-server",
     "auth",
+    "server-auth",
     "elicitation",
     "request-state",
     "schemars",
@@ -47,6 +48,8 @@ hyper = { version = "1" }
 hyper-util = { version = "0", features = ["server"] }
 tokio-util = { version = "0.7" }
 url = "2.5"
+async-trait = "0.1"
+tower-layer = "0.3"
 
 [dev-dependencies]
 tokio-stream = { version = "0.1" }
@@ -99,6 +102,10 @@ path = "src/simple_auth_streamhttp.rs"
 [[example]]
 name = "servers_complex_auth_streamhttp"
 path = "src/complex_auth_streamhttp.rs"
+
+[[example]]
+name = "servers_resource_server_auth_streamhttp"
+path = "src/resource_server_auth_streamhttp.rs"
 
 [[example]]
 name = "servers_cimd_auth_streamhttp"

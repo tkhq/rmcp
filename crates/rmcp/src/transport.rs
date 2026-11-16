@@ -107,6 +107,9 @@ pub use auth::{
     StoredAuthorizationState, StoredCredentials, WWWAuthenticateParams,
 };
 
+#[cfg(feature = "server-auth")]
+pub mod server_auth;
+
 // #[cfg(feature = "transport-ws")]
 // pub mod ws;
 #[cfg(feature = "transport-streamable-http-server-session")]
