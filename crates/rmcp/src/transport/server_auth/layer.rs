@@ -78,9 +78,9 @@ impl ResourceServerLayer {
     /// A layer for the resource that `metadata` describes. The public base
     /// URL defaults to the resource's origin.
     pub fn new(validator: impl TokenValidator, metadata: &ProtectedResourceMetadata) -> Self {
-        let resource = canonical_resource(&metadata.resource)
+        let resource = canonical_resource(metadata.resource())
             .expect("ProtectedResourceMetadata::new checked the resource");
-        let public_base_url = url::Url::parse(&metadata.resource)
+        let public_base_url = url::Url::parse(metadata.resource())
             .expect("ProtectedResourceMetadata::new checked the resource")
             .origin()
             .ascii_serialization();

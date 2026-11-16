@@ -117,7 +117,7 @@ tokio-stream = { version = "0.1", optional = true }
 uuid = { version = "1", features = ["v4"], optional = true }
 http-body = { version = "1", optional = true }
 http-body-util = { version = "0.1", optional = true }
-bytes = { version = "1", optional = true }
+bytes = { version = "1.9", optional = true }
 
 # for unix socket transport
 hyper = { version = "1", features = ["client", "http1"], optional = true }

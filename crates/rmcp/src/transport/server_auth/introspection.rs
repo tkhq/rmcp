@@ -413,8 +413,11 @@ impl IntrospectionValidator {
         Some(principal)
     }
 
-    /// The introspection request for `token`.
-    fn request(&self, token: &str) -> Result<reqwest::RequestBuilder, AuthError> {
+    /// The introspection request for `token`, without its form body.
+    fn request(
+        &self,
+        token: &str,
+    ) -> Result<(reqwest::RequestBuilder, Zeroizing<String>), AuthError> {
         let mut form = url::form_urlencoded::Serializer::new(String::new());
         form.append_pair("token", token)
             .append_pair("token_type_hint", "access_token");
@@ -456,15 +459,16 @@ impl IntrospectionValidator {
                 request = request.header(header::AUTHORIZATION, sensitive(&value)?);
             }
         }
-        let body = Zeroizing::new(form.finish());
-        Ok(request.body(body.as_str().to_owned()))
+        Ok((request, Zeroizing::new(form.finish())))
     }
 
     async fn ask(&self, token: &str) -> Result<Value, AuthError> {
         let unavailable =
             |reason: String| AuthError::unavailable(format!("introspection: {reason}"));
-        let mut response = self
-            .request(token)?
+        let (request, body) = self.request(token)?;
+        // The body owns the form, so it is wiped when reqwest drops the body.
+        let mut response = request
+            .body(bytes::Bytes::from_owner(body))
             .send()
             .await
             .map_err(|error| unavailable(error.without_url().to_string()))?;

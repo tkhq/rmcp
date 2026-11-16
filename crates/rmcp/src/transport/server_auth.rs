@@ -38,8 +38,8 @@
 //! # What stays in your code
 //!
 //! The layer does not bind MCP sessions to principals, issue tokens, or decide
-//! what a principal may do beyond scopes. See the `servers_resource_server_auth`
-//! example for a full server.
+//! what a principal may do beyond scopes. See the
+//! `servers_resource_server_auth_streamhttp` example for a full server.
 //!
 //! [MCP authorization specification]: https://modelcontextprotocol.io/specification/draft/basic/authorization
 

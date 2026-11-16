@@ -54,9 +54,10 @@ const BIND_ADDRESS: &str = "127.0.0.1:8000";
 const RESOURCE: &str = "http://127.0.0.1:8000/mcp";
 const AUTHORIZATION_SERVER: &str = "https://auth.example.com";
 
-/// A fixed table of tokens. Do not use static tokens in production.
+/// A fixed table of tokens, stored as SHA-256 digests. Do not use static
+/// tokens in production.
 struct InMemoryValidator {
-    tokens: Vec<(&'static str, AuthenticatedPrincipal)>,
+    tokens: Vec<(String, AuthenticatedPrincipal)>,
 }
 
 impl InMemoryValidator {
@@ -72,8 +73,11 @@ impl InMemoryValidator {
         };
         Self {
             tokens: vec![
-                ("demo-token", principal("alice", &["mcp"])),
-                ("read-only-token", principal("bob", &["read"])),
+                (sha256_digest(b"demo-token"), principal("alice", &["mcp"])),
+                (
+                    sha256_digest(b"read-only-token"),
+                    principal("bob", &["read"]),
+                ),
             ],
         }
     }
@@ -85,12 +89,13 @@ impl TokenValidator for InMemoryValidator {
         &self,
         request: &ValidationRequest<'_>,
     ) -> Result<AuthenticatedPrincipal, AuthError> {
-        let presented = request.credential.token.as_bytes();
-        // Check every entry in constant time, so the answer time does not
-        // reveal how much of a token matched.
+        // Compare fixed-length digests in constant time and check every
+        // entry, so the answer time reveals neither the token length nor how
+        // much of a token matched.
+        let presented = sha256_digest(request.credential.token.as_bytes());
         let mut found = None;
-        for (token, principal) in &self.tokens {
-            if constant_time_eq(token.as_bytes(), presented) {
+        for (digest, principal) in &self.tokens {
+            if constant_time_eq(digest.as_bytes(), presented.as_bytes()) {
                 found = Some(principal.clone());
             }
         }

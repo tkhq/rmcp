@@ -29,11 +29,20 @@ pub struct MetadataError {
 /// [`ProtectedResourceMetadataService`] at [`Self::metadata_path`], and give
 /// [`Self::metadata_url`] to [`super::ResourceServerLayer`] for the
 /// `resource_metadata` challenge parameter.
+///
+/// The resource identifier is private, so it stays the URL that [`Self::new`]
+/// checked. Read it with [`Self::resource`]:
+///
+/// ```compile_fail,E0616
+/// # use rmcp::transport::server_auth::ProtectedResourceMetadata;
+/// let mut metadata = ProtectedResourceMetadata::new("https://mcp.example.com/mcp").unwrap();
+/// metadata.resource = "not a URL".to_owned();
+/// ```
 #[derive(Debug, Clone, PartialEq, Serialize)]
 #[non_exhaustive]
 pub struct ProtectedResourceMetadata {
     /// The resource identifier: the MCP endpoint URL.
-    pub resource: String,
+    resource: String,
     /// Authorization server issuer identifiers (RFC 8414).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub authorization_servers: Vec<String>,
@@ -91,6 +100,11 @@ impl ProtectedResourceMetadata {
             dpop_bound_access_tokens_required: false,
             extra: serde_json::Map::new(),
         })
+    }
+
+    /// The resource identifier that [`Self::new`] accepted.
+    pub fn resource(&self) -> &str {
+        &self.resource
     }
 
     /// Add an authorization server issuer identifier.
@@ -274,6 +288,26 @@ mod tests {
         assert_eq!(
             metadata.metadata_url(),
             "http://localhost:8000/.well-known/oauth-protected-resource/mcp"
+        );
+    }
+
+    #[test]
+    fn builders_keep_the_checked_resource() {
+        let metadata = ProtectedResourceMetadata::new("https://mcp.example.com/mcp")
+            .unwrap()
+            .with_authorization_server("https://auth.example.com")
+            .with_scopes_supported(["mcp"])
+            .with_resource_name("Example")
+            .with_resource_documentation("https://docs.example.com")
+            .with_dpop(["ES256"], false);
+        assert_eq!(metadata.resource(), "https://mcp.example.com/mcp");
+        assert_eq!(
+            metadata.metadata_url(),
+            "https://mcp.example.com/.well-known/oauth-protected-resource/mcp"
+        );
+        assert_eq!(
+            metadata.metadata_path(),
+            "/.well-known/oauth-protected-resource/mcp"
         );
     }
 
