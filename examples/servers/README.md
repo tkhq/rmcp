@@ -42,6 +42,15 @@ A server using streamable HTTP transport for MCP communication, with hyper.
 - Provides counter tools via HTTP streaming
 - Demonstrates streamable HTTP transport configuration
 
+### OAuth Resource Server (`resource_server_auth_streamhttp.rs`)
+
+A streamable HTTP server behind `ResourceServerLayer` (feature `server-auth`).
+
+- Serves RFC 9728 protected resource metadata and answers 401/403 with the challenges MCP clients use for discovery
+- Uses an in-memory token table as the `TokenValidator`
+- A `whoami` tool reads the `AuthenticatedPrincipal` from the request parts
+- Run with `cargo run -p mcp-server-examples --example servers_resource_server_auth_streamhttp`
+
 ### Elicitation Demo (`elicitation_stdio.rs`)
 
 A working MCP server demonstrating elicitation for user name collection.

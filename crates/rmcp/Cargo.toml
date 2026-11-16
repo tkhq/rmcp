@@ -31,6 +31,8 @@ features = [
   "reqwest-tls-no-provider",
   "schemars",
   "server",
+  "server-auth",
+  "server-auth-introspection",
   "server-side-http",
   "tower",
   "transport-async-rw",
@@ -98,6 +100,7 @@ url = { version = "2.4", optional = true }
 
 # For tower compatibility
 tower-service = { version = "0.3", optional = true }
+tower-layer = { version = "0.3", optional = true }
 
 # for child process transport
 process-wrap = { version = "10.0", features = ["tokio1"], optional = true }
@@ -114,7 +117,7 @@ tokio-stream = { version = "0.1", optional = true }
 uuid = { version = "1", features = ["v4"], optional = true }
 http-body = { version = "1", optional = true }
 http-body-util = { version = "0.1", optional = true }
-bytes = { version = "1", optional = true }
+bytes = { version = "1.9", optional = true }
 
 # for unix socket transport
 hyper = { version = "1", features = ["client", "http1"], optional = true }
@@ -219,6 +222,20 @@ tower = ["dep:tower-service"]
 auth = ["dep:async-trait", "dep:oauth2", "__reqwest", "dep:url"]
 auth-client-credentials-jwt = ["auth", "dep:jsonwebtoken", "uuid"]
 auth-enterprise-managed = ["auth", "base64"]
+# OAuth resource-server layer for HTTP MCP servers (RFC 9728 metadata, RFC 6750 challenges)
+server-auth = [
+  "server",
+  "dep:async-trait",
+  "dep:http",
+  "dep:http-body",
+  "dep:http-body-util",
+  "dep:bytes",
+  "dep:url",
+  "dep:tower-layer",
+  "tower",
+]
+# RFC 7662 token introspection validator for `server-auth`
+server-auth-introspection = ["server-auth", "__reqwest", "base64", "dep:zeroize"]
 schemars = ["dep:schemars"]
 
 [dev-dependencies]
